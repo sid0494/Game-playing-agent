@@ -7,7 +7,7 @@ class cell:
 		self.owner = owner
 		self.value = value
 
-def minimax_decision(grid, players, N, depth, cutoff):
+def minimax_decision(grid, values, players, N, depth, cutoff):
 
 	move = None
 	v = -9999
@@ -27,7 +27,7 @@ def minimax_decision(grid, players, N, depth, cutoff):
 
 	return move
 
-def min_value(grid, players, N, depth, cutoff):
+def min_value(grid, values, players, N, depth, cutoff):
 
 	if depth == cutoff:
 		return grid_value(grid, players[0], N)
@@ -43,10 +43,10 @@ def min_value(grid, players, N, depth, cutoff):
 				v = new_value
 		return v
 
-def max_value(grid, players, N, depth, cutoff):
+def max_value(grid, values, players, N, depth, cutoff):
 
 	if depth == cutoff:
-		return grid_value(grid, players[0], N)
+		return grid_value(grid, values, players[0], N)
 	else:
 		v = -9999
 		for s in possible_stakes(grid, players[0], N):
@@ -60,16 +60,16 @@ def max_value(grid, players, N, depth, cutoff):
 		return v
 
 
-def grid_value(grid, player, N):
+def grid_value(grid, values, player, N):
 
 	player_score = 0
 
 	for r in xrange(0, N):
 		for c in xrange(0, N):
-			if grid[r][c].owner == player:
-				player_score += grid[r][c].value
-			elif grid[r][c].owner != '.':
-				player_score -= grid[r][c].value
+			if grid[r][c] == player:
+				player_score += values[r][c]
+			elif grid[r][c] != '.':
+				player_score -= values[r][c]
 
 	return player_score
 
@@ -79,7 +79,7 @@ def possible_stakes(grid, player, N):
 
 	for r in xrange(0, N):
 		for c in xrange(0, N):
-			if grid[r][c].owner == '.':
+			if grid[r][c] == '.':
 				stakes.append((chr(ord('A') + c) + str(r + 1), r, c))
 
 	return stakes
@@ -90,7 +90,7 @@ def possible_raids(grid, player, N):
 
 	for r in xrange(0, N):
 		for c in xrange(0, N):
-			if grid[r][c].owner == player:
+			if grid[r][c] == player:
 				raids += check_raids(r, c, grid, player, N)
 
 	return raids
@@ -101,37 +101,37 @@ def check_raids(r, c, grid, player, N):
 
 	for i in [-1, 1]:
 		if r + i >= 0 and r + i < N:
-			if grid[r + i][c].owner == '.':
+			if grid[r + i][c] == '.':
 				raids.append((chr(ord('A') + c) + str(r + i + 1), r + i, c))
 
 	for j in [-1, 1]:
 		if c + j >= 0 and c + j < N:
-			if grid[r][c + j].owner == '.':
+			if grid[r][c + j] == '.':
 				raids.append((chr(ord('A') + c + j) + str(r + 1), r, c + j))
 
 	return raids
 
 def execute_stake(r, c, grid, player, N):
 	
-	new_grid = copy.deepcopy(grid)
-	new_grid[r][c].owner = player
+	new_grid = map(list, grid)
+	new_grid[r][c] = player
 
 	return new_grid
 
 def execute_raid(r, c, grid, player, N):
 	
-	new_grid = copy.deepcopy(grid)
-	new_grid[r][c].owner = player
+	new_grid = map(list, grid)
+	new_grid[r][c] = player
 
 	for i in [-1, 1]:
 		if r + i >= 0 and r + i < N:
-			if grid[r + i][c].owner != '.':
-				new_grid[r + i][c].owner = player
+			if grid[r + i][c] != '.':
+				new_grid[r + i][c] = player
 
 	for j in [-1, 1]:
 		if c + j >= 0 and c + j < N:
-			if grid[r][c + j].owner != '.':
-				new_grid[r][c + j].owner = player
+			if grid[r][c + j] != '.':
+				new_grid[r][c + j] = player
 
 	return new_grid
 
@@ -150,21 +150,22 @@ N = int(input_file.readline().rstrip('\n'))
 algorithm = input_file.readline().rstrip('\n')
 player = input_file.readline().rstrip('\n')
 cutoff = int(input_file.readline().rstrip('\n'))
+values = []
 grid = []
 
 for r in xrange(0,N):
 	data = input_file.readline().rstrip('\n').split(' ')
-	row = [cell(int(x)) for x in data]
+	row = [int(x) for x in data]
 	# print row
-	grid.append(row)
+	values.append(row)
 
 for r in xrange(0,N):
 	data = input_file.readline().rstrip('\n').split(' ')
-	for c in xrange(0,N):
-		grid[r][c].owner = data[c]
+	row = [x for x in data]
+	grid.append(row)
 
 players = [player, get_opponent(player)]
-optimal_move = minimax_decision(grid, players, N, 0, cutoff)
+optimal_move = minimax_decision(grid, values, players, N, 0, cutoff)
 
 print optimal_move[0]
 
@@ -182,7 +183,7 @@ else:
 
 for r in xrange(0,N):
 	for c in xrange(0,N):
-		print grid[r][c].owner,
+		print grid[r][c],
 	print ""
 
 # print ""
