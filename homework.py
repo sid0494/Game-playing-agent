@@ -7,23 +7,91 @@ class cell:
 		self.owner = owner
 		self.value = value
 
+def aplha_beta_decision(grid, values, players, N, depth, cutoff):
+
+	move = None
+	v = -9999
+	aplha = -9999
+	beta = 9999
+	for s in possible_stakes(grid, players[0], N):
+		new_value = min_value_ab(execute_stake(s[1], s[2], grid, players[0], N), values, players, N, depth + 1, cutoff, aplha, beta)
+		if v < new_value:
+			v = new_value
+			move = [s[0] + " Stake", (s[1], s[2])]
+			# print move
+	for r in possible_raids(grid, players[0], N):
+		new_value = min_value_ab(execute_raid(r[1], r[2], grid, players[0], N), values, players, N, depth + 1, cutoff, aplha, beta)
+		if v < new_value:
+			v = new_value
+			move = [r[0] + " Raid", (r[1], r[2])]
+			# print move
+
+	return move
+
+def min_value_ab(grid, values, players, N, depth, cutoff, aplha, beta):
+
+	if depth == cutoff:
+		return grid_value(grid, players[0], N)
+	else:
+		v = 9999
+		for s in possible_stakes(grid, players[1], N):
+			new_value = max_value_ab(execute_stake(s[1], s[2], grid, players[1], N), values, players, N, depth + 1, cutoff, aplha, beta)
+			if v > new_value:
+				v = new_value
+				if v <= aplha:
+					return v
+				if beta > v:
+					beta = v
+		for r in possible_raids(grid, players[1], N):
+			new_value = max_value_ab(execute_raid(r[1], r[2], grid, players[1], N), values, players, N, depth + 1, cutoff, aplha, beta)
+			if v > new_value:
+				v = new_value
+				if v <= aplha:
+					return v
+				if beta > v:
+					beta = v
+		return v
+
+def max_value_ab(grid, values, players, N, depth, cutoff, aplha, beta):
+
+	if depth == cutoff:
+		return grid_value(grid, values, players[0], N)
+	else:
+		v = -9999
+		for s in possible_stakes(grid, players[0], N):
+			new_value = min_value_ab(execute_stake(s[1], s[2], grid, players[0], N), values, players, N, depth + 1, cutoff, aplha, beta)
+			if v < new_value:
+				v = new_value
+				if v >= beta:
+					return v
+				if aplha < v:
+					alpha = v
+		for r in possible_raids(grid, players[0], N):
+			new_value = min_value_ab(execute_raid(r[1], r[2], grid, players[0], N), values, players, N, depth + 1, cutoff, aplha, beta)
+			if v < new_value:
+				v = new_value
+				if v >= beta:
+					return v
+				if aplha < v:
+					alpha = v
+		return v
+
 def minimax_decision(grid, values, players, N, depth, cutoff):
 
 	move = None
 	v = -9999
 	for s in possible_stakes(grid, players[0], N):
-		for s in possible_stakes(grid, players[0], N):
-			new_value = min_value(execute_stake(s[1], s[2], grid, players[0], N), players, N, depth + 1, cutoff)
-			if v < new_value:
-				v = new_value
-				move = [s[0] + " Stake", (s[1], s[2])]
-				# print move
-		for r in possible_raids(grid, players[0], N):
-			new_value = min_value(execute_raid(r[1], r[2], grid, players[0], N), players, N, depth + 1, cutoff)
-			if v < new_value:
-				v = new_value
-				move = [r[0] + " Raid", (r[1], r[2])]
-				# print move
+		new_value = min_value(execute_stake(s[1], s[2], grid, players[0], N), values, players, N, depth + 1, cutoff)
+		if v < new_value:
+			v = new_value
+			move = [s[0] + " Stake", (s[1], s[2])]
+			# print move
+	for r in possible_raids(grid, players[0], N):
+		new_value = min_value(execute_raid(r[1], r[2], grid, players[0], N), values, players, N, depth + 1, cutoff)
+		if v < new_value:
+			v = new_value
+			move = [r[0] + " Raid", (r[1], r[2])]
+			# print move
 
 	return move
 
@@ -34,11 +102,11 @@ def min_value(grid, values, players, N, depth, cutoff):
 	else:
 		v = 9999
 		for s in possible_stakes(grid, players[1], N):
-			new_value = max_value(execute_stake(s[1], s[2], grid, players[1], N), players, N, depth + 1, cutoff)
+			new_value = max_value(execute_stake(s[1], s[2], grid, players[1], N), values, players, N, depth + 1, cutoff)
 			if v > new_value:
 				v = new_value
 		for r in possible_raids(grid, players[1], N):
-			new_value = max_value(execute_raid(r[1], r[2], grid, players[1], N), players, N, depth + 1, cutoff)
+			new_value = max_value(execute_raid(r[1], r[2], grid, players[1], N), values, players, N, depth + 1, cutoff)
 			if v > new_value:
 				v = new_value
 		return v
@@ -50,11 +118,11 @@ def max_value(grid, values, players, N, depth, cutoff):
 	else:
 		v = -9999
 		for s in possible_stakes(grid, players[0], N):
-			new_value = min_value(execute_stake(s[1], s[2], grid, players[0], N), players, N, depth + 1, cutoff)
+			new_value = min_value(execute_stake(s[1], s[2], grid, players[0], N), values, players, N, depth + 1, cutoff)
 			if v < new_value:
 				v = new_value
 		for r in possible_raids(grid, players[0], N):
-			new_value = min_value(execute_raid(r[1], r[2], grid, players[0], N), players, N, depth + 1, cutoff)
+			new_value = min_value(execute_raid(r[1], r[2], grid, players[0], N), values, players, N, depth + 1, cutoff)
 			if v < new_value:
 				v = new_value
 		return v
@@ -165,7 +233,14 @@ for r in xrange(0,N):
 	grid.append(row)
 
 players = [player, get_opponent(player)]
-optimal_move = minimax_decision(grid, values, players, N, 0, cutoff)
+
+if algorithm == "MINIMAX":
+	optimal_move = minimax_decision(grid, values, players, N, 0, cutoff)
+elif algorithm == "ALPHABETA":
+	optimal_move = aplha_beta_decision(grid, values, players, N, 0, cutoff)
+else:
+	#competition strategy
+	print "Work in progress...."
 
 print optimal_move[0]
 
