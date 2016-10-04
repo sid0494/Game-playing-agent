@@ -213,6 +213,7 @@ def get_opponent(player):
 #-------------------------------------------------------------------------------------------
 
 input_file = open("input.txt")
+output_file = open("output.txt", "w")
 
 N = int(input_file.readline().rstrip('\n'))
 algorithm = input_file.readline().rstrip('\n')
@@ -242,7 +243,7 @@ else:
 	#competition strategy
 	print "Work in progress...."
 
-print optimal_move[0]
+# print optimal_move[0]
 
 if "Raid" in optimal_move[0]:
 	grid = execute_raid(optimal_move[1][0], optimal_move[1][1], grid, player, N)
@@ -256,10 +257,18 @@ else:
 
 # new = execute_raid(raids[0][1], raids[0][2], grid, player, N)
 
+output_file.write(optimal_move[0])
+
+array = "\n"
+
 for r in xrange(0,N):
 	for c in xrange(0,N):
-		print grid[r][c],
-	print ""
+		array += grid[r][c]
+		array += " "
+	array += "\n"
+
+output_file.write(array)
+output_file.close()
 
 # print ""
 
