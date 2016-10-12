@@ -1,5 +1,5 @@
 import numpy
-import copy
+import time
 
 class cell:
 
@@ -31,7 +31,7 @@ def aplha_beta_decision(grid, values, players, N, depth, cutoff):
 def min_value_ab(grid, values, players, N, depth, cutoff, aplha, beta):
 
 	if depth == cutoff:
-		return grid_value(grid, players[0], N)
+		return grid_value(grid, values, players[0], N)
 	else:
 		v = 9999
 		for s in possible_stakes(grid, players[1], N):
@@ -98,7 +98,7 @@ def minimax_decision(grid, values, players, N, depth, cutoff):
 def min_value(grid, values, players, N, depth, cutoff):
 
 	if depth == cutoff:
-		return grid_value(grid, players[0], N)
+		return grid_value(grid, values, players[0], N)
 	else:
 		v = 9999
 		for s in possible_stakes(grid, players[1], N):
@@ -147,6 +147,7 @@ def possible_stakes(grid, player, N):
 
 	for r in xrange(0, N):
 		for c in xrange(0, N):
+			#print grid
 			if grid[r][c] == '.':
 				stakes.append((chr(ord('A') + c) + str(r + 1), r, c))
 
@@ -161,7 +162,7 @@ def possible_raids(grid, player, N):
 			if grid[r][c] == player:
 				raids += check_raids(r, c, grid, player, N)
 
-	return raids
+	return list(set(raids))
 
 def check_raids(r, c, grid, player, N):
 	
@@ -212,6 +213,7 @@ def get_opponent(player):
 #-------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------
 
+t = time.time()
 input_file = open("input.txt")
 output_file = open("output.txt", "w")
 
@@ -229,11 +231,14 @@ for r in xrange(0,N):
 	values.append(row)
 
 for r in xrange(0,N):
-	data = input_file.readline().rstrip('\n').split(' ')
+	data = input_file.readline().rstrip('\n')
 	row = [x for x in data]
 	grid.append(row)
 
 players = [player, get_opponent(player)]
+
+#print len(grid)
+#print len(grid[0])
 
 if algorithm == "MINIMAX":
 	optimal_move = minimax_decision(grid, values, players, N, 0, cutoff)
@@ -264,11 +269,13 @@ array = "\n"
 for r in xrange(0,N):
 	for c in xrange(0,N):
 		array += grid[r][c]
-		array += " "
+		#array += " "
 	array += "\n"
 
 output_file.write(array)
 output_file.close()
+
+print "%.2f"%(time.time()-t)
 
 # print ""
 
