@@ -272,7 +272,7 @@ for r in xrange(0,N):
 		#array += " "
 	array += "\n"
 
-output_file.write(array)
+output_file.write(array[:-1])
 output_file.close()
 
 print "%.2f"%(time.time()-t)
